@@ -5,19 +5,11 @@ import {
   IsOptional,
   IsString,
 } from "class-validator";
-import { Gender } from "../enums/gender.enum";
 import { Type } from "class-transformer";
 
 export class UserDto {
   @IsString()
-  firstName!: string;
-
-  @IsOptional()
-  @IsString()
-  lastName?: string;
-
-  @IsEnum(Gender)
-  gender!: Gender;
+  name!: string;
 
   @Type(() => Number)
   @IsLatitude()

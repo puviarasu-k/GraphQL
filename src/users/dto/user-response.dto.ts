@@ -1,4 +1,3 @@
-import { Gender } from "../enums/gender.enum";
 import { Role } from "../enums/role.enum";
 import { User } from "../entities/user.entity";
 
@@ -9,20 +8,16 @@ import { User } from "../entities/user.entity";
  */
 export class UserResponseDto {
   id: number;
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   mobile: string;
-  gender?: Gender;
   role: Role;
   isActive: boolean;
   createdAt: Date;
 
   private constructor(user: User) {
     this.id = user.id;
-    this.firstName = user.firstName;
-    this.lastName = user.lastName;
+    this.name = user.name;
     this.mobile = user.mobile;
-    this.gender = user.gender;
     this.role = user.role;
     this.isActive = user.isActive;
     this.createdAt = user.createdAt;

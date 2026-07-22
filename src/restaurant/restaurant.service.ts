@@ -1,16 +1,22 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { getRandomValues } from "node:crypto";
 import { DataSource, Repository } from "typeorm";
 import { Restaurant } from "../users/entities/restaurants.entity";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
-import { Outlet } from "src/users/entities/outlets.entity";
-import { QueueSession } from "src/users/entities/queue-sessions.entity";
+import { Outlet } from "../users/entities/outlets.entity";
+import { QueueSession } from "../users/entities/queue-sessions.entity";
+import { Staff } from "../users/entities/staff.entity";
 import {
   QueueEntry,
   QueueStatus,
-} from "src/users/entities/queue-entries.entity";
+} from "../users/entities/queue-entries.entity";
 import { CreateOutletDto } from "./dto/create-outlet.dto";
+import { RestaurantResponseDto } from "./dto/restaurant-response.dto";
 import { CreateQueueEntryDto } from "./dto/create-queue-entry.dto";
 import { QueueEntryResponseDto } from "./dto/queue-entry-response.dto";
 import { UpdateQueueEntryStatusDto } from "./dto/update-queue-entry-status.dto";
@@ -25,28 +31,53 @@ export class RestaurantService {
     private readonly outletsRepository: Repository<Outlet>,
     @InjectRepository(QueueSession)
     private readonly queueSessionsRepository: Repository<QueueSession>,
+    @InjectRepository(Staff)
+    private readonly staffRepository: Repository<Staff>,
     private readonly dataSource: DataSource,
     private readonly eventsGateway: EventsGateway,
   ) {}
 
-  findAll(): Promise<Restaurant[]> {
-    return this.restaurantsRepository.find({ order: { name: "ASC" } });
+  async findAll(): Promise<RestaurantResponseDto[]> {
+    const restaurants = await this.restaurantsRepository.find({
+      order: { name: "ASC" },
+    });
+    return restaurants.map((restaurant) =>
+      RestaurantResponseDto.fromEntity(restaurant),
+    );
   }
 
-  async create(createRestaurantDto: CreateRestaurantDto): Promise<Restaurant> {
-    const savedRestaurant =
-      await this.restaurantsRepository.save(createRestaurantDto);
+  async create(
+    createRestaurantDto: CreateRestaurantDto,
+    ownerId: number,
+  ): Promise<Restaurant> {
+    const savedRestaurant = await this.restaurantsRepository.save({
+      ...createRestaurantDto,
+      owner: { id: ownerId },
+    });
     return savedRestaurant;
   }
 
-  async createOutlet(createOutletDto: CreateOutletDto): Promise<Outlet> {
+  async createOutlet(
+    createOutletDto: CreateOutletDto,
+    callerId: number,
+  ): Promise<Outlet> {
     const { restaurantId, ...outletData } = createOutletDto;
-    const restaurant = await this.restaurantsRepository.findOneBy({
-      id: restaurantId,
+    const restaurant = await this.restaurantsRepository.findOne({
+      where: { id: restaurantId },
+      relations: { owner: true },
     });
 
     if (!restaurant) {
       throw new NotFoundException("Restaurant not found");
+    }
+
+    // Role (SELLER) proves the caller runs *some* business, not that they
+    // run *this* one — without this check any seller could add outlets to
+    // a competitor's restaurant just by guessing/incrementing restaurantId.
+    if (restaurant.owner.id !== callerId) {
+      throw new ForbiddenException(
+        "You do not have permission to manage this restaurant",
+      );
     }
 
     const outlet = this.outletsRepository.create({
@@ -102,6 +133,7 @@ export class RestaurantService {
 
   async createQueueEntry(
     createQueueEntryDto: CreateQueueEntryDto,
+    callerId: number,
   ): Promise<QueueEntryResponseDto> {
     const businessDate = new Date().toISOString().slice(0, 10);
 
@@ -154,7 +186,7 @@ export class RestaurantService {
         await queueEntriesRepository.save(
           queueEntriesRepository.create({
             queueSessionId: queueSession,
-            userId: createQueueEntryDto.userId,
+            userId: callerId,
             tokenNumber: currentToken,
             status: QueueStatus.WAITING,
             joinedAt: new Date(),
@@ -172,9 +204,37 @@ export class RestaurantService {
 
   async updateQueueEntryStatus(
     updateQueueEntryStatusDto: UpdateQueueEntryStatusDto,
+    callerId: number,
   ): Promise<QueueEntry> {
     const { publicId, queueEntryId, tokenNumber, status } =
       updateQueueEntryStatusDto;
+
+    // The caller must be active staff at this specific outlet, or the
+    // owner of the restaurant it belongs to — being *a* SELLER isn't
+    // enough, since that would let any seller call other restaurants'
+    // queues (this endpoint used to have no auth at all).
+    const outlet = await this.outletsRepository.findOne({
+      where: { publicId },
+      relations: { restaurant: { owner: true } },
+    });
+    if (!outlet) {
+      throw new NotFoundException("Outlet not found");
+    }
+    const isOwner = outlet.restaurant.owner.id === callerId;
+    const isOutletStaff = isOwner
+      ? true
+      : await this.staffRepository.exists({
+          where: {
+            outlet: { id: outlet.id },
+            user: { id: callerId },
+            isActive: true,
+          },
+        });
+    if (!isOutletStaff) {
+      throw new ForbiddenException(
+        "You do not have permission to manage this outlet's queue",
+      );
+    }
 
     const queueEntry = await this.dataSource.transaction(async (manager) => {
       // Ensure the entry belongs to the outlet represented by the public ID;

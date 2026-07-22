@@ -30,7 +30,7 @@ import { Role } from "../users/enums/role.enum";
  */
 @Controller("admin/redis")
 @UseGuards(RolesGuard)
-@Roles(Role.ADMIN)
+@Roles(Role.SELLER)
 export class RedisController {
   constructor(private readonly redisService: RedisService) {}
 

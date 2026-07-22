@@ -14,6 +14,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { RedisService } from "../redis/redis.service";
 import { UsersService } from "../users/users.service";
 import { User } from "../users/entities/user.entity";
+import { Role } from "../users/enums/role.enum";
 import { UserResponseDto } from "../users/dto/user-response.dto";
 import { TokenResponseDto } from "./dto/token-response.dto";
 
@@ -25,6 +26,8 @@ interface OtpRecord {
 
 interface AccessTokenPayload {
   sub: number;
+  mobile: string;
+  role: Role;
   jti: string;
   type: "access";
 }
@@ -133,8 +136,7 @@ export class AuthService {
 
     // bcrypt.compare is a constant-time comparison of the hash — avoids
     // leaking timing info about how many characters matched.
-    // const isMatch = await bcrypt.compare(userOtp, otpHash);
-    const isMatch = true;
+    const isMatch = await bcrypt.compare(userOtp, record.otpHash);
 
     if (!isMatch) {
       const updatedRecord: OtpRecord = { ...record, attempts: attempts + 1 };
@@ -224,6 +226,8 @@ export class AuthService {
     const accessJti = randomUUID();
     const accessPayload: AccessTokenPayload = {
       sub: user.id,
+      mobile: user.mobile,
+      role: user.role,
       jti: accessJti,
       type: "access",
     };
