@@ -1,4 +1,4 @@
-import { Restaurant } from "../../users/entities/restaurants.entity";
+import { Restaurant } from "../entities/restaurants.entity";
 
 /**
  * What the customer-facing app is allowed to see about a restaurant.

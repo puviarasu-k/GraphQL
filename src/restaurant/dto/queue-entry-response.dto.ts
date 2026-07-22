@@ -1,4 +1,4 @@
-import { QueueStatus } from "../../users/entities/queue-entries.entity";
+import { QueueStatus } from "../entities/queue-entries.entity";
 
 export class QueueEntryResponseDto {
   restaurantName!: string;

@@ -12,11 +12,11 @@ import { UsersModule } from "./users/users.module";
 import { RedisModule } from "./redis/redis.module";
 import { EventsModule } from "./events/events.module";
 import { User } from "./users/entities/user.entity";
-import { Restaurant } from "./users/entities/restaurants.entity";
-import { Outlet } from "./users/entities/outlets.entity";
-import { QueueSession } from "./users/entities/queue-sessions.entity";
-import { QueueEntry } from "./users/entities/queue-entries.entity";
-import { Staff } from "./users/entities/staff.entity";
+import { Restaurant } from "./restaurant/entities/restaurants.entity";
+import { Outlet } from "./restaurant/entities/outlets.entity";
+import { QueueSession } from "./restaurant/entities/queue-sessions.entity";
+import { QueueEntry } from "./restaurant/entities/queue-entries.entity";
+import { Staff } from "./restaurant/entities/staff.entity";
 
 import configuration from "./config/configuration";
 import { validate } from "./config/env.validation";

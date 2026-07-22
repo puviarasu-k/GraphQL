@@ -6,15 +6,15 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { getRandomValues } from "node:crypto";
 import { DataSource, Repository } from "typeorm";
-import { Restaurant } from "../users/entities/restaurants.entity";
+import { Restaurant } from "./entities/restaurants.entity";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
-import { Outlet } from "../users/entities/outlets.entity";
-import { QueueSession } from "../users/entities/queue-sessions.entity";
-import { Staff } from "../users/entities/staff.entity";
+import { Outlet } from "./entities/outlets.entity";
+import { QueueSession } from "./entities/queue-sessions.entity";
+import { Staff } from "./entities/staff.entity";
 import {
   QueueEntry,
   QueueStatus,
-} from "../users/entities/queue-entries.entity";
+} from "./entities/queue-entries.entity";
 import { CreateOutletDto } from "./dto/create-outlet.dto";
 import { RestaurantResponseDto } from "./dto/restaurant-response.dto";
 import { CreateQueueEntryDto } from "./dto/create-queue-entry.dto";

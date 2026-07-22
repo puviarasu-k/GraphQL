@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
-import { Restaurant } from "../users/entities/restaurants.entity";
+import { Restaurant } from "./entities/restaurants.entity";
 import { CreateRestaurantDto } from "./dto/create-restaurant.dto";
 import { RestaurantService } from "./restaurant.service";
 import { CreateOutletDto } from "./dto/create-outlet.dto";
-import { Outlet } from "../users/entities/outlets.entity";
+import { Outlet } from "./entities/outlets.entity";
 import { CreateQueueEntryDto } from "./dto/create-queue-entry.dto";
 import { QueueEntryResponseDto } from "./dto/queue-entry-response.dto";
-import { QueueEntry } from "../users/entities/queue-entries.entity";
+import { QueueEntry } from "./entities/queue-entries.entity";
 import { UpdateQueueEntryStatusDto } from "./dto/update-queue-entry-status.dto";
 import { Public } from "../common/decorators/public.decorator";
 import { Roles } from "../common/decorators/roles.decorator";

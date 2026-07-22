@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { Outlet } from "./outlets.entity";
-import { User } from "./user.entity";
+import { User } from "../../users/entities/user.entity";
 
 @Entity({ schema: "zeroqueue", name: "staff" })
 export class Staff {

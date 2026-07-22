@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Outlet } from "../users/entities/outlets.entity";
-import { QueueEntry } from "../users/entities/queue-entries.entity";
-import { QueueSession } from "../users/entities/queue-sessions.entity";
-import { Restaurant } from "../users/entities/restaurants.entity";
-import { Staff } from "../users/entities/staff.entity";
+import { Outlet } from "./entities/outlets.entity";
+import { QueueEntry } from "./entities/queue-entries.entity";
+import { QueueSession } from "./entities/queue-sessions.entity";
+import { Restaurant } from "./entities/restaurants.entity";
+import { Staff } from "./entities/staff.entity";
 import { User } from "../users/entities/user.entity";
 import { EventsModule } from "../events/events.module";
 import { RestaurantController } from "./restaurant.controller";

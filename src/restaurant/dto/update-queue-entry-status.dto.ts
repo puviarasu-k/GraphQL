@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsString, Min } from "class-validator";
-import { QueueStatus } from "../../users/entities/queue-entries.entity";
+import { QueueStatus } from "../entities/queue-entries.entity";
 
 export class UpdateQueueEntryStatusDto {
   @IsString()
